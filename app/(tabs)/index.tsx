@@ -59,7 +59,6 @@ export default function HomeScreen() {
         <Image source={{ uri: 'https://placehold.jp/150x150.png' }} style={styles.image} />
       </View>
 
-      {/* Demo Boxes */}
       <View style={styles.section}>
         <Text style={styles.title}>Demo Boxes</Text>
         <View style={styles.boxesContainer}>
@@ -69,7 +68,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Demo List Header */}
       <Text style={styles.title}>Demo List</Text>
     </>
   );
