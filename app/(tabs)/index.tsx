@@ -1,33 +1,19 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-
-type Quote = {
-  _id: string;
-  content: string;
-  author: string;
-}
+import { useFetchQuote } from "@/hooks/use-fetch-quote";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 
 export default function HomeScreen() {
-  const [quote, setQuote] = useState<Quote | null>(null);
-
-  useEffect(() => {
-    fetchQuote();
-  }, [])
-
-  const fetchQuote = async () => {
-    const response = await fetch('http://api.quotable.io/quotes/random');
-    const data = await response.json();
-
-    setQuote(data[0]);
-
-  }
+  const { quote, isLoading, fetchQuote } = useFetchQuote();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ランダム名言</Text>
-      <View style={styles.quoteContainer}>
-        <Text>{quote?.content}</Text>
-        <Text>{quote?.author}</Text>
-      </View>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="blue" style={styles.loader} />
+      ) : (
+        <View style={styles.quoteContainer}>
+          <Text>{quote?.content}</Text>
+          <Text>{quote?.author}</Text>
+        </View>
+      )}
       <TouchableOpacity onPress={fetchQuote} style={styles.button}>
         <Text style={styles.buttonText}>次の名言を表示</Text>
       </TouchableOpacity>
@@ -65,4 +51,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
   },
+  loader: {
+    marginVertical: 40,
+  }
 });

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(smart-git-workflow)",
+      "Bash(gh repo create:*)",
+      "Bash(git push:*)",
+      "Bash(gh auth:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
