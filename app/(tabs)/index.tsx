@@ -1,7 +1,8 @@
 import { useFetchQuote } from "@/hooks/use-fetch-quote";
 import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions, FlatList } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, useWindowDimensions } from "react-native";
 import { FlashList } from "@shopify/flash-list";
+import { Link, useRouter } from "expo-router";
 
 type Item = {
   id: string;
@@ -22,6 +23,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const [items, setItems] = useState<Item[]>(generateItems(50));
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const router = useRouter();
 
   const onRefresh = async () => {
     setIsRefreshing(true);
@@ -51,6 +53,12 @@ export default function HomeScreen() {
         <TouchableOpacity onPress={fetchQuote} style={styles.button}>
           <Text style={styles.buttonText}>次の名言を表示</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/detail')}>
+          <Text style={styles.buttonText}>詳細画面へ遷移</Text>
+        </TouchableOpacity>
+        <Link href="/detail">
+          <Text>Linkを使って詳細画面へ遷移</Text>
+        </Link>
       </View>
 
       <View style={styles.section}>
@@ -77,7 +85,10 @@ export default function HomeScreen() {
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       data={items}
-      renderItem={({ item }) => <Text style={styles.listItem}>{item.text}</Text>}
+      renderItem={({ item }) =>
+        <Link href={`/items/${item.id}`} style={styles.listItem}>
+          <Text>{item.text}</Text>
+        </Link>}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={renderHeader}
       refreshing={isRefreshing}
