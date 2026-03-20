@@ -1,59 +1,77 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, TextInput } from "react-native";
 import { useRouter } from "expo-router";
+import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from 'react';
+import { CameraPermissionGate } from "@/components/camera-permission-gate";
+import { CameraPreview } from "@/components/camera-preview";
+import { HapticFeedbackButton } from "@/components/haptic-feedback-button";
+import { TextSaveForm } from "@/components/text-save-form";
+import { PrimaryButton } from "@/components/ui/primary-button";
+import * as Notifications from 'expo-notifications';
+import { useEffect, useState } from "react";
 
-const STORAGE_KEY = 'text';
+// 通知のハンドラーを設定
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+})
 
 export default function HomeScreen() {
-  const [text, setText] = useState('');
   const router = useRouter();
-
-  const handlePress = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  }
+  const [permissionGranted, setPermissionGranted] = useState(false);
 
   useEffect(() => {
-    loadText();
+    requestPermision();
   }, []);
 
-  const loadText = async () => {
-    const saved = await AsyncStorage.getItem(STORAGE_KEY);
-    if(saved != null) {
-      setText(saved);
-    }
+  const requestPermision = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    setPermissionGranted(status === 'granted');
   }
 
-  const saveText = async () => {
-    await AsyncStorage.setItem(STORAGE_KEY, text);
-    alert('保存しました');
+  const scheduleNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'リマインダー',
+        body: '5秒が経過しました'
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 5
+      }
+    })
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior="padding"
-      >
-        <View style={styles.top}>
-          <TouchableOpacity style={styles.button} onPress={() => router.push("/detail")}>
-            <Text style={styles.buttonText}>詳細画面</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handlePress}>
-            <Text style={styles.buttonText}>Haptic Feedback</Text>
-          </TouchableOpacity>
-        </View>
+    <CameraPermissionGate>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior="padding"
+        >
+          {/* <View style={styles.top}>
+            <PrimaryButton onPress={() => router.push("/detail")}>詳細画面</PrimaryButton>
+            <HapticFeedbackButton />
+          </View>
 
-        <View>
-          <TextInput value={text} onChangeText={setText} placeholder="テキストを入力してください" style={styles.input} />
-          <TouchableOpacity style={styles.button} onPress={saveText}>
-            <Text style={styles.buttonText}>保存</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <CameraPreview /> */}
+
+          <Text style={styles.title}>ローカル通知のデモ</Text>
+          {permissionGranted ? (
+            <PrimaryButton onPress={scheduleNotification}>
+              5秒後に通知を送信
+            </PrimaryButton>
+          ) : (
+            <Text>通知の許可が必要です</Text>
+          )}
+
+          {/* <TextSaveForm storageKey="text" /> */}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </CameraPermissionGate>
   );
 }
 
@@ -66,29 +84,15 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    gap: 20,
   },
   top: {
     gap: 20,
   },
-  button: {
-    backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "white",
-    textAlign: "center",
-    fontSize: 16,
-  },
-  link: {
-    fontSize: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 24,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
 });
